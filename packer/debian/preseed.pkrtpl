@@ -40,7 +40,7 @@ d-i netcfg/dhcpv6_timeout string 0
 # Automatic network configuration is the default.
 # If you prefer to configure the network manually, uncomment this line and
 # the static network configuration below.
-d-i netcfg/disable_autoconfig boolean true
+#d-i netcfg/disable_autoconfig boolean true
 #d-i netcfg/use_autoconfig boolean false
 
 # If you want the preconfiguration file to work on systems both with and
@@ -52,11 +52,11 @@ d-i netcfg/disable_autoconfig boolean true
 # Static network configuration.
 #
 # IPv4 example
-d-i netcfg/get_ipaddress string 192.168.84.49
-d-i netcfg/get_netmask string 255.255.255.0
-d-i netcfg/get_gateway string 192.168.84.2
-d-i netcfg/get_nameservers string 1.1.1.1
-d-i netcfg/confirm_static boolean true
+#d-i netcfg/get_ipaddress string ${vmIP}
+#d-i netcfg/get_netmask string ${vmMask}
+#d-i netcfg/get_gateway string ${vmRouter}
+d-i netcfg/get_nameservers string ${vmDNS}
+#d-i netcfg/confirm_static boolean true
 #
 # IPv6 example
 #d-i netcfg/get_ipaddress string fc00::2
@@ -465,7 +465,7 @@ d-i finish-install/reboot_in_progress note
 
 # This first command is run as early as possible, just after
 # preseeding is read.
-#d-i preseed/early_command string anna-install some-udeb
+#d-i preseed/early_command string 
 # This command is run immediately before the partitioner starts. It may be
 # useful to apply dynamic partitioner preseeding that depends on the state
 # of the disks (which may not be visible when preseed/early_command runs).

@@ -17,6 +17,33 @@ variable "localIP" {
   default = env("LOCAL_IP")
 }
 
+variable "ide_path" {
+  type = string
+  default = env("IDE_PATH")
+}
+
+/*
+variable "vmIP" {
+  type = string
+  default = env("VM_IP")
+}
+
+variable "vmMask" {
+  type = string
+  default = env("VM_MASK")
+}
+
+variable "vmRouter" {
+  type = string
+  default = env("VM_ROUTER")
+}
+*/
+
+variable "vmDNS" {
+  type = string
+  default = "1.1.1.1"
+}
+
 source "vmware-iso" "debian" {
   cpus = 4
   memory = 8192
@@ -29,7 +56,9 @@ source "vmware-iso" "debian" {
   vnc_port_min = 5900
   vnc_port_max = 5900
 
-  http_directory = "./http"
+  http_content = {
+    "/preseed.cfg" = templatefile("${path.root}/preseed.pkrtpl", var)
+  }
   
   boot_wait      = "10s"
   boot_command = [
@@ -44,7 +73,7 @@ source "vmware-iso" "debian" {
   shutdown_command = "shutdown -P now"
 
   vmx_data = {
-    "ide0:0.filename" = "C:\\Users\\nwm\\tmp\\cyberopsinfralab\\iso\\debian-12.2.0-amd64-DVD-1.iso"
+    "ide0:0.filename" = "${var.ide_path}"
   }
 }
 

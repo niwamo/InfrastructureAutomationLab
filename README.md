@@ -19,39 +19,41 @@ ln -s $(pwd) /repo
 ```
 
 ```bash
+# from inside the container -->
 # link vmware exe's
 /repo/build-env/link-vmware-binaries.sh
 export PATH="${PATH}:/vmware"
 # trigger netmap
 vmnetcfg
-# change settings > okay > exit
+# in the GUI: change settings > okay > exit
 /repo/build-env/link-vmware-configs.sh
+# prep networking 
+/repo/build-env/prep-network.sh
 ```
 
 ## Running Packer
 
 ```Bash
-# need iptables (output)
-
-# need to create dummy license
-touch /etc/vmware/license-ws-dummy
-# from inside the container
+# before we move dirs, set environment variables needed by the packer config
+# found a workaround for the first several; keeping temporarily for reference
+#natNet=$(vmrun listHostNetworks | grep nat)
+#ipBase=$(echo $natNet | awk -F " " '{print $5}' | grep -Po "(\d{1,3}\.){3}")
+#export VM_IP="${ipBase}79"
+#export VM_ROUTER="${ipBase}2"
+#export VM_MASK=$(echo $natNet | awk -F " " '{print $6}')
+export IDE_PATH="C:$(pwd | grep -Po "(?<=/mnt/c).*" | sed 's/\//\\/g')\\iso\\debian-12.2.0-amd64-DVD-1.iso"
+export LOCAL_IP=$(ip address show dev eth0 | grep -Po "(?<=inet\s)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
+# move to packer dir and run build
 cd /repo/packer/debian
 packer init .
 packer build .
 ```
 
+## Troubleshooting
 
-# OUTPUT: DNAT       tcp  --  anywhere             anywhere             tcp dpt:5900 to:192.168.48.1:5900
-# POSTROUTE: MASQUERADE  all  --  anywhere             anywhere             ADDRTYPE match src-type LOCAL dst-type UNICAST
-
-# get-nettcpconnection | where {($_.State -eq "Listen")} | select LocalAddress,LocalPort,RemoteAddress,RemotePort,State,@{Name="Process";Expression={(Get-Process -Id $_.OwningProcess).ProcessName}} | ft
-# gwmi win32_process | where name -match vmware-vmx
-
-ide0:0.filename = "C:\Users\nwm\tmp\cyberopsinfra\iso\debian-12.2.0-adm64-DVD-1.iso"
-
-iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 5900 -j DNAT --to-destination 10.0.3.22:5900
-root@desk:/repo/packer/debian# iptables -t nat -A POSTROUTING -m addrtype --src-type LOCAL
---dst-type UNICAST -j MASQUERADE
-
-strace lsof
+```powershell:troubleshooting commands used in making this lab
+get-nettcpconnection | where {($_.State -eq "Listen")} | select LocalAddress,LocalPort,RemoteAddress,RemotePort,State,@{Name="Process";Expression={(Get-Process -Id $_.OwningProcess).ProcessName}} | ft
+gwmi win32_process | where name -match vmware-vmx
+strace
+lsof
+```
