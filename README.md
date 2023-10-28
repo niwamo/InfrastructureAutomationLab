@@ -14,12 +14,12 @@ New-Item -ItemType Directory -Path $wslDir -Force
 wsl.exe --import build-env $wslDir $tarPath
 # open the distro
 wsl -d build-env
-# make the repo easily available in the distro
-ln -s $(pwd) /repo
 ```
 
 ```bash
 # from inside the container -->
+# make the repo easily available in the distro
+ln -s $(pwd) /repo
 # link vmware exe's
 /repo/build-env/link-vmware-binaries.sh
 export PATH="${PATH}:/vmware"
@@ -49,11 +49,17 @@ packer init .
 packer build .
 ```
 
+## Running Terraform
+
+```Bash
+cd /repo/terraform/pve
+```
+
 ## Troubleshooting
 
 ```powershell:troubleshooting commands used in making this lab
 get-nettcpconnection | where {($_.State -eq "Listen")} | select LocalAddress,LocalPort,RemoteAddress,RemotePort,State,@{Name="Process";Expression={(Get-Process -Id $_.OwningProcess).ProcessName}} | ft
 gwmi win32_process | where name -match vmware-vmx
-strace
+strace -f -o /tmp/strace.log cmd
 lsof
 ```

@@ -52,9 +52,9 @@ d-i netcfg/dhcpv6_timeout string 0
 # Static network configuration.
 #
 # IPv4 example
-#d-i netcfg/get_ipaddress string ${vmIP}
-#d-i netcfg/get_netmask string ${vmMask}
-#d-i netcfg/get_gateway string ${vmRouter}
+#d-i netcfg/get_ipaddress string {vmIP}
+#d-i netcfg/get_netmask string {vmMask}
+#d-i netcfg/get_gateway string {vmRouter}
 d-i netcfg/get_nameservers string ${vmDNS}
 #d-i netcfg/confirm_static boolean true
 #
