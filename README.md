@@ -51,8 +51,18 @@ packer build .
 
 ## Running Terraform
 
+```PowerShell
+# on the Windows host
+& 'C:\Program Files (x86)\VMWare\VMWare Workstation\vmrest.exe' -C
+& 'C:\Program Files (x86)\VMWare\VMWare Workstation\vmrest.exe'
+netsh interface portproxy add v4tov4 listenport=8697 listenaddress=192.168.48.1 connectport=8697 connectaddress=127.0.0.1
+New-NetFirewallRule -DisplayName "WSL" -Direction Inbound  -InterfaceAlias "vEthernet (WSL)"  -Action Allow
+```
+
 ```Bash
-cd /repo/terraform/pve
+cd /repo/terraform/proxmox
+terraform init
+terraform apply
 ```
 
 ## Troubleshooting
@@ -63,3 +73,6 @@ gwmi win32_process | where name -match vmware-vmx
 strace -f -o /tmp/strace.log cmd
 lsof
 ```
+
+tfusers
+Passw0rd!

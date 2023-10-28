@@ -20,3 +20,6 @@ crash.log
 
 # packer output
 **/output*
+
+# terraform providers
+**/.terraform/
