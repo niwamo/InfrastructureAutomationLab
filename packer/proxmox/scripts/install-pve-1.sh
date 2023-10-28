@@ -2,21 +2,29 @@
 interface=$(tail -n 1 /etc/network/interfaces | cut -d ' ' -f 2)
 ip=$(ip address show dev $interface | grep -Po "(?<=inet\s)(\d{1,3}\.){3}\d{1,3}/\d{2}")
 gw=$(ip route | grep default | cut -d ' ' -f 3)
-head -n -1 /etc/network/interfaces > /etc/network/interfaces
+head -n -2 /etc/network/interfaces > /etc/network/interfaces
 cat << EOF | tee -a /etc/network/interfaces
-iface $interface inet static
+iface $interface inet manual
+
+auto vmbr0
+iface vmbr0 inet manual
     address $ip
     gateway $gw
+    bridge-ports $interface
+    bridge-stp off
+    bridge-fd 0
+    bridge-vlan-aware yes
+    bridge-vids 2-4094
 EOF
 
 # set hostname
 hostnamectl set-hostname proxmox-vm
 
 # add /etc/hosts entry
+$ip=$(echo $ip | cut -d '/' -f 1)
 cat << EOF > /etc/hosts
 127.0.0.1 localhost.localdomain localhost
-$ip proxmox-vm.local proxmox-vm
-
+$ip proxmox-vm
 EOF
 
 # add pve repo
