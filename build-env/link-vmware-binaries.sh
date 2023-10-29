@@ -11,4 +11,8 @@ do
 done
 
 mkdir -p /usr/lib/vmware/bin
-ln -s "$vmwareDir"/x64/vmware-vmx.exe /usr/lib/vmware/bin/vmware-vmx
+cat << EOF > /usr/lib/vmware/bin/vmware-vmx
+#!/bin/bash
+>&2 echo VMWare Workstation 10.
+EOF
+chmod +x /usr/lib/vmware/bin/vmware-vmx

@@ -1,7 +1,7 @@
 # input vars
 $username = "tfuser"
 $password = "Passw0rd!"
-$vmToClone = "packer-debian"
+$vmToClone = "packer-proxmox"
 $baseURI = "http://localhost:8697/api"
 
 # generate auth header

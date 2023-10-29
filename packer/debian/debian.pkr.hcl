@@ -1,7 +1,17 @@
+# Plugin Repo
 # https://github.com/hashicorp/packer-plugin-vmware/tree/main/docs
+
+# Plugin Docs
 # https://developer.hashicorp.com/packer/integrations/hashicorp/vmware/latest/components/builder/iso
+
+# Download link for iso
 # https://cdimage.debian.org/debian-cd/12.2.0/amd64/iso-dvd/
+
+# Some Preseed info
 # https://www.debian.org/releases/stable/i386/apbs04.en.html
+
+# The example preseed with all settings and explanations
+# https://www.debian.org/releases/stable/example-preseed.txt
 
 packer {
   required_plugins {
@@ -17,9 +27,19 @@ variable "localIP" {
   default = env("LOCAL_IP")
 }
 
-variable "ide_path" {
+variable "idePath" {
   type = string
   default = env("IDE_PATH")
+}
+
+variable "isoUrl" {
+  type = string
+  default = env("ISO_URL")
+}
+
+variable "isoChecksum" {
+  type = string
+  default = env("ISO_CHECKSUM")
 }
 
 variable "vmDNS" {
@@ -32,8 +52,8 @@ source "vmware-iso" "debian" {
   memory = 8192
   network = "nat"
 
-  iso_url = "file:/repo/iso/debian-12.2.0-amd64-DVD-1.iso"
-  iso_checksum = "sha256:d969b315de093bc065b4f12ab0dd3f5601b52d67a0c622627c899f1d35834b82"
+  iso_url = var.isoUrl
+  iso_checksum = var.isoChecksum
 
   vnc_bind_address = "0.0.0.0"
   vnc_port_min = 5900
@@ -56,7 +76,7 @@ source "vmware-iso" "debian" {
   shutdown_command = "shutdown -P now"
 
   vmx_data = {
-    "ide0:0.filename" = "${var.ide_path}"
+    "ide0:0.filename" = "${var.idePath}"
   }
 }
 

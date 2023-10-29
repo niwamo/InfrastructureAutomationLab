@@ -117,11 +117,11 @@ if [ $(ls -l /vmware 2>/dev/null | wc -l ) -lt 25 ]; then
     ~/link-vmware-binaries.sh
 fi
 # add vmware binaries to our path if not already there
-if [ ! $(which vmrun) = "/vmware/vmrun" ]; then
+if [ ! "$(which vmrun)" = "/vmware/vmrun" ]; then
     export PATH="${PATH}:/vmware"
 fi
 # link vmware configs if not already linked
-if [ -f /etc/vmware/license-ws-dummy ]; then
+if [ ! -f /etc/vmware/license-ws-dummy ]; then
     ~/link-vmware-configs.sh
 fi
 # prep port forwarding for packer VNC connections, if not already prepped
