@@ -111,3 +111,20 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
+# link vmware binaries if not already linked
+if [ $(ls -l /vmware 2>/dev/null | wc -l ) -lt 25 ]; then
+    ~/link-vmware-binaries.sh
+fi
+# add vmware binaries to our path if not already there
+if [ ! $(which vmrun) = "/vmware/vmrun" ]; then
+    export PATH="${PATH}:/vmware"
+fi
+# link vmware configs if not already linked
+if [ -f /etc/vmware/license-ws-dummy ]; then
+    ~/link-vmware-configs.sh
+fi
+# prep port forwarding for packer VNC connections, if not already prepped
+if [ $(iptables -t nat -L OUTPUT | grep 5900 | wc -l) -lt 1 ]; then
+    ~/prep-network.sh
+fi

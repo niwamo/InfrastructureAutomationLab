@@ -23,3 +23,6 @@ crash.log
 
 # terraform providers
 **/.terraform/
+
+# ignore our hacky symlink
+**/C:*

@@ -22,23 +22,6 @@ variable "ide_path" {
   default = env("IDE_PATH")
 }
 
-/*
-variable "vmIP" {
-  type = string
-  default = env("VM_IP")
-}
-
-variable "vmMask" {
-  type = string
-  default = env("VM_MASK")
-}
-
-variable "vmRouter" {
-  type = string
-  default = env("VM_ROUTER")
-}
-*/
-
 variable "vmDNS" {
   type = string
   default = "1.1.1.1"
@@ -81,9 +64,6 @@ build {
   sources = ["sources.vmware-iso.debian"]
 
   provisioner "shell" {
-    execute_command = "/bin/sh -c '{{ .Vars }} {{ .Path }}'"
-    inline = [
-      "echo hello world"
-    ]
+    script = "./scripts/add-apt-sources.sh"
   }
 }

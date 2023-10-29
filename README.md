@@ -16,63 +16,54 @@ wsl.exe --import build-env $wslDir $tarPath
 wsl -d build-env
 ```
 
-```bash
-# from inside the container -->
-# make the repo easily available in the distro
-ln -s $(pwd) /repo
-# link vmware exe's
-/repo/build-env/link-vmware-binaries.sh
-export PATH="${PATH}:/vmware"
-# trigger netmap
-vmnetcfg
-# in the GUI: change settings > okay > exit
-/repo/build-env/link-vmware-configs.sh
-# prep networking 
-/repo/build-env/prep-network.sh
-```
+## Packer
 
-## Running Packer
+### Building Debian
 
 ```Bash
 # before we move dirs, set environment variables needed by the packer config
-# found a workaround for the first several; keeping temporarily for reference
-#natNet=$(vmrun listHostNetworks | grep nat)
-#ipBase=$(echo $natNet | awk -F " " '{print $5}' | grep -Po "(\d{1,3}\.){3}")
-#export VM_IP="${ipBase}79"
-#export VM_ROUTER="${ipBase}2"
-#export VM_MASK=$(echo $natNet | awk -F " " '{print $6}')
-export IDE_PATH="C:$(pwd | grep -Po "(?<=/mnt/c).*" | sed 's/\//\\/g')\\iso\\debian-12.2.0-amd64-DVD-1.iso"
+export REPO_DIR_WSL=$(pwd)
+export REPO_DIR="C:$(pwd | grep -Po "(?<=/mnt/c).*" | sed 's/\//\\/g')"
+export IDE_PATH="$REPO_DIR\\iso\\debian-12.2.0-amd64-DVD-1.iso"
 export LOCAL_IP=$(ip address show dev eth0 | grep -Po "(?<=inet\s)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
 # move to packer dir and run build
-cd /repo/packer/debian
+cd ./packer/debian
 packer init .
 packer build .
 ```
 
-## Running Terraform
-
-```PowerShell
-# on the Windows host
-& 'C:\Program Files (x86)\VMWare\VMWare Workstation\vmrest.exe' -C
-& 'C:\Program Files (x86)\VMWare\VMWare Workstation\vmrest.exe'
-netsh interface portproxy add v4tov4 listenport=8697 listenaddress=192.168.48.1 connectport=8697 connectaddress=127.0.0.1
-New-NetFirewallRule -DisplayName "WSL" -Direction Inbound  -InterfaceAlias "vEthernet (WSL)"  -Action Allow
-```
+### Building Proxmox
 
 ```Bash
-cd /repo/terraform/proxmox
-terraform init
-terraform apply
+# get the vmx path for our clone
+vmx_path="$REPO_DIR\\packer\\debian\\output-debian\\packer-debian.vmx"
+targetPath="$REPO_CIR_WSL/packer/debian/output-debian/packer-debian.vmx"
+# create a dummy link to fool the packer plugin
+ln -s $targetPath $vmx_path
+export VMX_PATH=$vmx_path
+# run the build
+packer build .
+```
+
+## Cloning Proxmox with the VMWare API
+
+```PowerShell
+# back on the Windows host
+& 'C:\Program Files (x86)\VMWare\VMWare Workstation\vmrest.exe' -C
+& 'C:\Program Files (x86)\VMWare\VMWare Workstation\vmrest.exe'
+# in new pane -->
+./vm-scripts/clone-vm.ps1
 ```
 
 ## Troubleshooting
 
-```powershell:troubleshooting commands used in making this lab
-get-nettcpconnection | where {($_.State -eq "Listen")} | select LocalAddress,LocalPort,RemoteAddress,RemotePort,State,@{Name="Process";Expression={(Get-Process -Id $_.OwningProcess).ProcessName}} | ft
+```PowerShell:troubleshooting commands used in making this lab
+get-nettcpconnection | where {($_.State -eq "Listen")} | `
+    select LocalAddress,LocalPort,RemoteAddress,RemotePort,State,@{
+            Name="Process";
+            Expression={(Get-Process -Id $_.OwningProcess).ProcessName}
+        } | ft
 gwmi win32_process | where name -match vmware-vmx
 strace -f -o /tmp/strace.log cmd
 lsof
 ```
-
-tfusers
-Passw0rd!
