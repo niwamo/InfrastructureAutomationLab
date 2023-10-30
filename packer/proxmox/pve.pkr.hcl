@@ -42,4 +42,10 @@ build {
     script = "./scripts/install-pve-2.sh"
     pause_after = "2m"
   }
+  provisioner "shell" {
+    start_retry_timeout = "5m"
+    expect_disconnect = true
+    script = "./scripts/install-pve-3.sh"
+    pause_after = "1m"
+  }
 }

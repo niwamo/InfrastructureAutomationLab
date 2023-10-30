@@ -7,6 +7,19 @@ VMWare Workstation. This serves two purposes:
    and/or testing with PVE
 2. Teaches students the skills they will need for future automation work
 
+Tools Covered
+- git, Docker, Packer, WSL, VMWare, PVE
+- some Bash/PowerShell scripting, including the scripting of API calls
+
+Labs
+- create and use a git repository throughout
+- create and deploy a containerized build environment
+- create and run Packer configs for automating:
+    - the installation of a Debian VM from an iso image
+    - the installation of the Proxmox Virtualization Environment onto a Debian VM
+- use the VMWare Workstation Pro API to clone and deploy a PVE environment
+- explore the PVE GUI
+
 Students should not have access to this repo until after the lab. Throughout the 2-day course, the
 instructor is directed to provide specific components of this repo to students. The suggested method
 for doing this is to create a "class repo" and add the shared components to it one by one,
@@ -28,8 +41,70 @@ Students should have the following installed and/or downloaded on their workstat
 
 ## Day 1, Part 1 (3 hours)
 
-1. Introductory material on infrastructure automation / IaC / immutable infrastucture (<u>1h</u>)
-    - See `slides/`
+1. Introductory material on infrastructure & infrastructure automation (<u>30m</u>)
+    - Discussion / Q&A format; Could benefit from slides in a future iteration
+        - What is "infrastructure"?
+            - any aspect of the IT environment used to accomplish your use case, including hardware -
+            networking equipment, workstations, servers, TAPs, etc. - and software - operating
+            systems, libraries, applications, etc. - and all associated configurations
+            - the spectrum of tech solutions from in terms of infrastructure involvement
+                - fully manual
+                    - open source or developed in-house
+                    - deployed on-premises on fully-managed servers
+                    - networks, operating systems, and dependencies all have to be continually managed/maintained
+                - fully managed (SaaS)
+                    - vendor-developed, deployed, and managed
+                    - accessed via vendor-defined means (typically a web app and/or API)
+                    - no network, OS, library, code, or even application management
+                    - just configure the in-app settings and go
+            - the spectrum (continued)
+                - On a quad chart of:
+                    - internally-focused (Enterprise Cybersecurity) to externally-focused (Cybersecurity Consultants)
+                    - small budget to big budget
+                - there is a fairly linear relationship from:
+                    - small budget & a focus on client/impermanent infrastructure
+                        - manual is often better
+                        - example: for an externally-focused group engaging with a client for a short period of
+                        time (e.g. consultants performing a vulnerability assessment or executing IR): 
+                            - fully-managed or even locally-deployed commercial products often don't make sense
+                            - too many licensing and contractual considerations to be addressed for a short-term engagement
+                            - also, $$$
+                    - large budget & a focus on internal/permanent infrastructure
+                        - managed is often better
+                        - economies of scale and specialization of labor mean a product like Crowdstrike
+                        can afford to make a better EDR platform than even the largest of companies
+                        could produce in-house 
+        - Why are we learning about infrastructure?
+            - Because we fall into the "small budget" and "impermanent infrastructure" categories
+            - We want to:
+                - automate our permanent infrastructure (primarily for maintability)
+                - automate our impermanent infrastructure (as a matter of practicality)
+        - How do we automate impermanent infrastructure?
+            - You need methods for:
+                - configuring networking equipment
+                - deploying operating systems to nodes
+                - configuring newly-deployed OSs
+                    - cluster virtualization nodes
+                    - setup HA
+                - interacting with deployed virtualization platform
+                    - deploy whatever resources the situation calls for
+                        - SIEM, vulnerability scanner, workstations, etc. 
+            - Whiteboard session: ask students how they would approach each problem
+                - networking equipment: console ports connected to a "bootstrap box"
+                - deploying OSs: PXE, BMC/IPMI
+                - configuring deployed OSs: standard scripting, automation frameworks (e.g. Ansible)
+                - interacting with virtualization environments deployed to our OSs/nodes: packer &
+                terraform
+    - Introduce the labs
+        - Tools we'll cover:
+            - git, Docker, Packer, WSL, VMWare, PVE + some Bash/PowerShell scripting
+        - What we'll accomplish:
+            - create and deploy a containerized build environment
+            - create and run Packer configs for automating:
+                - the installation of a Debian VM from an iso image
+                - the installation of the Proxmox Virtualization Environment onto a Debian VM
+            - use the VMWare Workstation Pro API to clone and deploy a PVE environment
+            - explore the PVE GUI
 2. Familiarization video and demos for git (<u>30m</u>)
     - [Video](https://www.youtube.com/watch?v=HkdAHXoRtos) (12 minutes)
     - Demos:
@@ -43,7 +118,7 @@ Students should have the following installed and/or downloaded on their workstat
     - Students should clone the repo locally
     - When complete, instruct students to clone the class repo (which should currently be empty)
 4. Break (<u>15m</u>)
-5. Familiarization slides and demos for containerization and Docker: (<u>30m</u>)
+5. Familiarization slides and demos for containerization and Docker: (<u>45m</u>)
     - [Video 1](https://www.youtube.com/watch?v=cjXI-yxqGTI) (8 minutes)
     - [Video 2](https://www.youtube.com/watch?v=gAkwW2tuIqE) (11 minutes)
     - Discuss the benefits of containerization and why students might want to containerize their
@@ -51,7 +126,7 @@ Students should have the following installed and/or downloaded on their workstat
     - Demos:
         - running a container
         - building a container image
-6. **Hands-On** (<u>30m</u>)
+6. **Hands-On** (<u>45m</u>)
     - Instruct students to create a `/build-env` directory in their local repo
     - Within that repo, they should create a Dockerfile for a build environment
     - Requirements for their image:
@@ -243,7 +318,7 @@ wsl -d build-env
 
 **Note**: The following step assumes you have placed two items in an `iso` directory at the base of
 the repo:
-1. the debian iso
+1. a debian iso
 2. a "sha256sum" file with the iso hash
 
 ```Bash:Preparation
@@ -288,7 +363,8 @@ packer build .
 # run the API - note, this will "hang", so you'll need a new shell for API calls
 & 'C:\Program Files (x86)\VMWare\VMWare Workstation\vmrest.exe'
 # in another shell
-./vm-scripts/clone-vm.ps1
+./vmrest-scripts/clone-vm.ps1
+# note: you may need to reopen the VMWare GUI to see the new VM
 # kill the vmrest terminal when you're done; no additional cleanup necessary
 ```
 
@@ -313,22 +389,8 @@ if ($imageIds) {
         docker image rm $image
     }
 }
-# optionally, clean up VMWare Workstation (use the GUI console)
-# and, don't forget the packer 'output-<vmname>' directories
-```
-
-## Troubleshooting
-
-```PowerShell:troubleshooting commands used in making this lab
-get-nettcpconnection | where {($_.State -eq "Listen")} | `
-    select LocalAddress,LocalPort,RemoteAddress,RemotePort,State,@{
-            Name="Process";
-            Expression={(Get-Process -Id $_.OwningProcess).ProcessName}
-        } | ft
-gwmi win32_process | where name -match vmware-vmx
-```
-
-```Bash:troubleshooting commands used in making this lab
-strace -f -o /tmp/strace.log packer build .
-lsof
+# optionally, 
+#   - remove VMs from VMWare Workstation (use the GUI console)
+#   - remove any new VM dirs in VMWare Workstation's default path
+#   - remove the packer 'output-<vmname>' directories
 ```
