@@ -1,4 +1,6 @@
 # input vars
+# note that these creds are for a localhost-only server and I reset the creds every time
+# this is an example only
 $username = "tfuser"
 $password = "Passw0rd!"
 $vmToClone = "packer-proxmox"

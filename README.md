@@ -75,7 +75,8 @@ Students should have the following installed and/or downloaded on their workstat
                         can afford to make a better EDR platform than even the largest of companies
                         could produce in-house 
         - Why are we learning about infrastructure?
-            - Because we fall into the "small budget" and "impermanent infrastructure" categories
+            - Because (in the case of the original class audience) we fall into the "small budget"
+              and "impermanent infrastructure" categories 
             - We want to:
                 - automate our permanent infrastructure (primarily for maintability)
                 - automate our impermanent infrastructure (as a matter of practicality)
@@ -299,7 +300,7 @@ Students should have the following installed and/or downloaded on their workstat
 ```PowerShell
 # NOTE: FROM THE BASE DIR, NOT FROM build-env/
 # build the container
-$tag = "niwamo/build-env:1.0"
+$tag = "niwamo/build-env:1.0" # you will probably want to use your own tag
 docker build -t $tag -f ./build-env/Dockerfile .
 # export the container
 $tarPath = "$env:temp/build-env.tar"
